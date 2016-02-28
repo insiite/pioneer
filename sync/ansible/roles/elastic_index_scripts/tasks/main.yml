@@ -1,0 +1,16 @@
+---
+- name: Check that scripts directory exists
+  shell: if [ -e /etc/elasticsearch/scripts/ ]; then echo yes; else echo no; fi;
+  register: scripts_directory
+  always_run: True
+
+
+
+- name: Create scripts directory if applicable
+  command: mkdir scripts chdir=/etc/elasticsearch/
+  when: scripts_directory.stdout == 'no'
+
+- name: Install groovy scripts
+  copy: src={{project_elastic_config_path }}/{{ item }} dest=/etc/elasticsearch/scripts/{{ item }}
+  with_items: groovy_files
+  notify: Restart Elasticsearch

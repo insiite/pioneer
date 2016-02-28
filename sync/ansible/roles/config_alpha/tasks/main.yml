@@ -1,0 +1,39 @@
+---
+- name: checkout git to alpha
+  git: repo=/var/git_repo/site.git dest=/var/www/alpha clone=yes force=yes
+
+- name: composer install
+  command: composer install chdir={{ alpha_directory }}
+
+- name: composer dump-autoload
+  command: composer dump-autoload -o chdir={{ alpha_directory }}
+
+- name: Add owner to alpha directory
+  file: group=www-data recurse=yes path={{ alpha_directory }}
+
+- name: Grant permissions on alpha/storage
+  file: mode=0775 recurse=yes path={{ alpha_directory }}/storage
+
+- name: Configure env
+  template: src=.env.j2 dest={{ alpha_directory }}/.env
+
+- name: Generate a new APP_KEY
+  command: php artisan key:generate chdir={{ alpha_directory }}
+
+# Configure some phantom_runner.js settings
+- name: Configure some phantom_runner.js settings
+  lineinfile: dest={{ phantom_runner_path }} regexp='{{ item.regex }}' line='{{ item.line }}'
+  with_items:
+    - {regex: "var consoleLogDir = .*", line: "var consoleLogDir = '/var/www/alpha/storage/content';"}
+    - {regex: "var readableJSPath = .*", line: "var readableJSPath = '/var/www/alpha/app/Modules/Phantom/readable_80.js';
+"}
+
+# Configure some app config.js settings
+- name: Configure some config.js settings
+  lineinfile: dest={{ config_path }} regexp='{{ item.regex }}' line='{{ item.line }}'
+  with_items:
+    - {regex: "loginAPI:.*", line: "loginAPI: 'http://insiite.com/api/login',"}
+    - {regex: "logoutAPI:.*", line: "logoutAPI: 'http://insiite.com/api/logout',"}
+    - {regex: "pingAPI:.*", line: "pingAPI: 'http://insiite.com/api/ping',"}
+    - {regex: "signupAPI:.*", line: "signupAPI: 'http://insiite.com/api/signup',"}
+    - {regex: "baseAPI:.*", line: "baseAPI: 'http://insiite.com/api/',"}

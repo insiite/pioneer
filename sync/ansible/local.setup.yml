@@ -1,0 +1,19 @@
+---
+- name: Install MySQL, Nginx, PHP-FPM and other dependencies
+  hosts: local
+  become: yes
+
+  vars:
+    timezone: UTC
+
+    # mysql_password defaults to "secret", comment out for default
+    # mysql_password: password
+
+    # myaql_admin defaults to "homestead", comment out for default usage
+    # mysql_admin: admin
+
+  roles:
+      - base
+      - mysql
+      - config_mysql
+

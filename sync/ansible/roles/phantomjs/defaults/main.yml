@@ -1,0 +1,9 @@
+#phantomjs_version: '1.9.8'
+#phantomjs_url: 'https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-{{phantomjs_version}}-linux-{{ansible_machine}}.tar.bz2'
+phantomjs_version: '2.0'
+phantomjs_git_url: 'https://github.com/outboundexplorer/phantomjs2-ubuntu14-binary.git'
+phantomjs_bin_path: /usr/local/bin/phantomjs{{ phantomjs_version }}
+phantomjs_build_dir:  /usr/local/src/phantomjs
+phantomjs_download_path: "/tmp/phantomjs{{phantomjs_version}}"
+phantomjs_download_bin_path: "{{phantomjs_download_dir}}/phantomjs-{{phantomjs_version}}-linux-x86_64/bin/phantomjs"
+

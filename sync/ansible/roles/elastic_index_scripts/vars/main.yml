@@ -1,0 +1,9 @@
+---
+index_name: insiite_data
+project_elastic_config_path: /home/vagrant/sync/projects/bluemonkey/elastic_config
+groovy_files:
+ - addNoteAndIncrementNoteCount.groovy
+ - toggleArticleStatus.groovy
+ - deleteNoteAndDecrementNoteCount.groovy
+ - attachCollectionToItem.groovy
+ - detachCollectionFromItem.groovy

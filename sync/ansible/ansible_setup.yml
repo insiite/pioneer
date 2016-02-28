@@ -1,0 +1,11 @@
+---
+- name: Setup hosts
+  hosts: localhost
+  become: yes
+
+  vars:
+  # Uncomment and modify for managing remote server
+  # remote_IP: "178.65.42.72"
+
+  roles:
+      - ansible_setup

@@ -1,0 +1,12 @@
+---
+- name: Removing ElasticHQ
+  shell: bin/plugin remove hq  chdir={{ elastic_home_dir }}
+  ignore_errors: yes
+
+- name: install ElasticHQ
+  command: bin/plugin install royrusso/elasticsearch-HQ chdir={{ elastic_home_dir }}
+
+
+
+
+

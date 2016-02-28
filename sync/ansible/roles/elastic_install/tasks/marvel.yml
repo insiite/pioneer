@@ -1,0 +1,38 @@
+---
+- name: install marvel license
+  command: ./bin/plugin install license chdir={{ elastic_home_dir }}
+
+- name: install marvel
+  command: ./bin/plugin install marvel-agent chdir={{ elastic_home_dir }}
+
+#- name: Ensure Paths for Download only Plugins
+#  file:
+#    path="{{ elastic_plugin_dir }}/{{ item.name }}"
+#    state=directory
+#  when: item.download_only is defined and item.name is defined
+#  with_items: elastic_plugins
+#
+#- name: Ensure Paths for Kibana
+#  file:
+#    path="{{ elastic_plugin_dir }}/{{ item.name }}"
+#    state=directory
+#  with_items: kibana
+#
+#- name: Download only Plugins
+#  get_url:
+#    url={{ item.url }}
+#    dest={{ elastic_plugin_dir }}/{{ item.name }}
+#  when: item.download_only is defined and item.name is defined
+#  with_items: elastic_plugins
+#  ignore_errors: yes
+#
+#
+#- name: marvel | Installing Marvel Plugin
+#  shell: bin/plugin install file:/{{ elastic_plugin_dir }}/{{ item.name }}
+#    chdir={{ elastic_home_dir }}
+#  with_items: elastic_plugins
+#  register: marvel_plugins_installed
+#
+#- name: marvel | Installing Kibana
+#  shell: bin/kibana plugin --install marvel --url file:/{{ elastic_plugin_dir }}/{{ kibana.name }}
+#    chdir={{ elastic_home_dir }}

@@ -1,0 +1,12 @@
+---
+- name: Set up project folder and git hooks for deployment
+  hosts: remote
+  become: yes
+
+
+  vars:
+
+        repo_directory: "/var/git_repo/site.git"
+
+  roles:
+      - pre_deploy

@@ -1,0 +1,11 @@
+---
+- name: Install MySQL, Nginx, PHP-FPM and other packages based on Laravel Homestead
+  hosts: remote
+  become: yes
+
+
+  roles:
+      - base
+      - mysql
+      - config_mysql
+

@@ -1,0 +1,24 @@
+---
+
+elastic_download_url: https://download.elasticsearch.org/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch
+elastic_home_dir: /usr/share/elasticsearch
+elastic_work_dir: /tmp/elasticsearch
+elastic_log_dir: /var/log/elasticsearch
+elastic_data_dir: /var/lib/elasticsearch
+elastic_conf_dir: /etc/elasticsearch
+elastic_plugin_dir: /usr/share/elasticsearch/plugins
+elastic_max_open_files: 65535
+elastic_max_locked_memory: unlimited
+elastic_apt_dependencies:
+  - htop
+  - ntp
+  - unzip
+elastic_user: elasticsearch
+elastic_group: elasticsearch
+apt_cache_valid_time: 300
+elastic_plugins:
+  - { name: 'license-2.1.1.zip', url: 'https://download.elastic.co/elasticsearch/release/org/elasticsearch/plugin/license/2.1.1/license-2.1.1.zip', download_only: true }
+  - { name: 'marvel-agent-2.1.1.zip', url: 'https://download.elastic.co/elasticsearch/release/org/elasticsearch/plugin/marvel-agent/2.1.1/marvel-agent-2.1.1.zip', download_only: true }
+kibana:
+  - { name: 'marvel-2.1.1.tar.gz', url: 'https://download.elasticsearch.org/elasticsearch/marvel/marvel-2.1.1.tar.gz', download_only: true }
+

@@ -1,0 +1,30 @@
+---
+- name: Add vhost
+  hosts: local
+  become: yes
+
+  vars:
+
+    # Point to project's public folder
+    root_folder: "/home/vagrant/sync/myproject/public"
+
+    # Point to web address (avoid using '.com', '.org' or possible conflicting domain)
+    server_name: "myproject.local"
+
+    # serverblock_config defaults to serverblock.basic.js, comment out for default
+    #serverblock_config: serverblock.elastic.j2
+
+
+
+    ### Used for serverblock.elastic.j2 only ###
+    # auth_satisfy defaults to "any", comment out for default
+    #auth_satisfy: "any"
+
+    # nginx_users defaults to "admin:password", comment out for default
+    #nginx_users:
+    #  - { name: 'andy', password: 'secret' }
+
+
+
+  roles:
+      - nginx_vhost

@@ -1,0 +1,9 @@
+---
+# Restart php5-fpm
+- name: restart php7.0-fpm
+  service: name=php7.0-fpm state=restarted
+#  command: service php7.0-fpm restart
+
+# Restart Nginx
+- name: restart nginx
+  service: name=nginx state=restarted

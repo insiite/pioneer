@@ -1,0 +1,23 @@
+---
+- name: Check if Index Exists
+  uri:
+    url: "http://localhost:9200/{{ index_name }}"
+    method: HEAD
+#    user: admin
+#    password: password
+    status_code: 200,404
+  register: index_status
+- debug: var=index_status
+
+
+- name: Create or update settings
+  uri:
+    url: http://localhost:9200/{{ index_name }}
+    method: POST
+    status_code: 200
+    body: "{{ index_config }}"
+    HEADER_Content-Type: application/json
+  when: index_status.status == 404
+
+
+

@@ -1,0 +1,47 @@
+---
+# Install Some Basic Packages
+- name: install some basic packages
+  apt: name={{ item }} state=present
+  with_items:
+    - "g++"
+    - "flex"
+    - "bison"
+    - "gperf"
+    - "ruby"
+    - "perl"
+    - "libsqlite3-dev"
+    - "libfontconfig1-dev"
+    - "libicu-dev"
+    - "libfreetype6"
+    - "libssl-dev"
+    - "libpng-dev"
+    - "libjpeg-dev"
+    - "libxext-dev"
+    - "python"
+    - "build-essential"
+    - "ttf-mscorefonts-installer"
+
+# Update Package Lists
+- name: update package lists
+  apt: update_cache=yes
+
+
+- stat: path={{phantomjs_bin_path}}
+  register: phantomjs_bin
+
+# Clone the PhantomJS repo if binary not found
+- name: Clone the PhantomJS binary
+  git: repo={{ phantomjs_git_url }} recursive=yes dest={{ phantomjs_download_path }} force=yes
+  when: not phantomjs_bin.stat.exists
+
+- name: move the binary from tmp to /usr/local/bin
+  command: mv phantomjs {{ phantomjs_bin_path }} chdir={{ phantomjs_download_path }}
+  when: not phantomjs_bin.stat.exists
+
+
+- file: dest=/usr/local/bin/phantomjs
+        src={{ phantomjs_bin_path }}
+        state=link
+  when: not phantomjs_bin.stat.exists
+
+

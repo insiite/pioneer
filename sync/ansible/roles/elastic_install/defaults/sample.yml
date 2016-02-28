@@ -1,0 +1,7 @@
+---
+# All default settings are MUST-HAVE settings as there are no other defaults in place.
+# These settings should only be changed with great care
+
+
+# This is used to point to the installation of elastic -- currently this setting is used when we install marvel
+elastic_home_dir: /usr/share/elasticsearch

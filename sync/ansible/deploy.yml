@@ -1,0 +1,3 @@
+---
+- include: local.git_push.yml
+- include: remote.config_alpha.yml

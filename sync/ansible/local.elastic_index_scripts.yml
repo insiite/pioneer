@@ -1,0 +1,7 @@
+---
+- name: install elastic scripts
+  hosts: localhost
+  become: yes
+
+  roles:
+   - elastic_index_scripts

@@ -1,0 +1,21 @@
+---
+#What is vhosts
+- name: what is vhosts?
+  action: debug msg="{{server_name}}"
+
+# Copy Server Block To Nginx (WORKING)
+- name: copy server_block.conf to nginx/sites-available
+  template: dest=/etc/nginx/sites-available/{{ server_name }} src={{serverblock_config}}
+
+# Copy Server Block To Nginx
+- name: copy server_block.conf to nginx/sites-enabled
+  template: dest=/etc/nginx/sites-enabled/{{server_name}} src={{serverblock_config}}
+
+# Add a user to a password file and ensure permissions are set
+- name: set passwords for /etc/nginx/.htpasswd
+  htpasswd: path=/etc/nginx/.htpasswd name={{ item.name }} password={{ item.password }} owner=root group=www-data mode=0640
+  with_items: "{{nginx_users}}"
+
+# Ensure that Nginx is running
+- name: Ensure that Nginx is running
+  service: name=nginx state=restarted

@@ -1,0 +1,5 @@
+---
+serverblock_config: serverblock.basic.j2
+nginx_users:
+  - { name: 'admin', password: 'password' }
+

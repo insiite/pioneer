@@ -1,0 +1,5 @@
+---
+- name: git push
+  command: git push alpha master chdir={{ local_project_directory }}
+
+

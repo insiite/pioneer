@@ -1,0 +1,3 @@
+
+
+vagrant@ubuntu:~/Sync/Ansible$ ansible-playbook setup.yml --connection=local

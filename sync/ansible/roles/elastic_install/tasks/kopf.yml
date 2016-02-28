@@ -1,0 +1,14 @@
+---
+- name: Removing Kopf
+  shell: bin/plugin remove kopf  chdir={{ elastic_home_dir }}
+  ignore_errors: yes
+
+- name: install kopf
+  command: bin/plugin install lmenezes/elasticsearch-kopf chdir={{ elastic_home_dir }}
+
+# Copy kopf external settings
+- name: copy kopf external settings
+  template: dest=/usr/share/elasticsearch/plugins/kopf/_site/kopf_external_settings.json src=kopf_external_settings.json.j2
+
+
+

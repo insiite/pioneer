@@ -1,0 +1,249 @@
+---
+- name: Install python-software-properties
+  apt:
+    pkg=python-software-properties
+    state=present
+    cache_valid_time={{apt_cache_valid_time}}
+
+- name: Install PIP
+  apt: pkg=python-pip state=present
+
+- name: Install Python HTTPLib
+  pip: name=httplib2 state=present
+
+# Add the JAVE PPA repositories
+- name: add package repositories
+  apt_repository: repo={{ java_ppa }} update_cache=yes
+
+
+- name: Install OpenJDK8
+  apt: name={{ java_package }} state=present update_cache=yes
+  when: install_java
+
+
+
+- name: Install dependencies
+  apt:
+    pkg={{ item }}
+    state=present
+  with_items: elastic_apt_dependencies
+
+- name: Configuring elastic group
+  group:
+    name={{ elastic_group }}
+#
+- name: Configuring elastic user
+  user:
+    name={{ elastic_user }}
+    group={{ elastic_group }}
+    createhome=no
+
+- name: Ensure temporary elastic directories exists
+  file:
+    path="{{ elastic_work_dir }}"
+    state=directory
+    owner={{ elastic_user }}
+    group={{ elastic_group }}
+    recurse=yes
+#
+- name: Check if we have elastic with same version installed
+  stat:
+    path="/usr/share/elasticsearch/lib/elasticsearch-{{ elastic_version }}.jar"
+  register: installed_version
+
+- name: Try to stop elasticsearch if running
+  service:
+    name=elasticsearch
+    state=stopped
+  ignore_errors: yes
+  when: not installed_version.stat.exists
+
+- name: Download Elasticsearch deb
+  get_url:
+    url={{ elastic_download_url }}/{{ elastic_version }}/elasticsearch-{{ elastic_version }}.deb
+    dest=/tmp/elasticsearch-{{ elastic_version }}.deb
+    mode=0440
+  when: not installed_version.stat.exists
+
+#shell: dpkg --remove elasticsearch
+- name: Uninstalling previous version if applicable
+  apt:
+     name="elasticsearch"
+     state="absent"
+  when: not installed_version.stat.exists
+
+- name: Remove elasticsearch directory
+  file:
+    path="{{ elastic_home_dir }}"
+    state=absent
+  when: not installed_version.stat.exists
+
+- name: Install Elasticsearch deb
+  shell: dpkg -i -E --force-confnew /tmp/elasticsearch-{{ elastic_version }}.deb
+  when: not installed_version.stat.exists
+  notify: Restart Elasticsearch
+
+- name: Ensure elastic directories exists
+  file:
+    path="{{ item }}"
+    state=directory
+    owner={{ elastic_user }}
+    group={{ elastic_group }}
+    recurse=yes
+  with_items:
+     - "{{ elastic_work_dir }}"
+     - "{{ elastic_home_dir }}"
+     - "{{ elastic_log_dir }}"
+     - "{{ elastic_data_dir }}"
+     - "{{ elastic_conf_dir }}"
+
+- name: Configure limits max_open_files
+  lineinfile:
+    dest=/etc/security/limits.conf
+    regexp='^{{ elastic_user }}     -    nofile    {{ elastic_max_open_files }}'
+    insertafter=EOF
+    line='{{ elastic_user }}     -    nofile    {{ elastic_max_open_files }}'
+  when: elastic_max_open_files is defined
+  notify: Restart Elasticsearch
+
+- name: Configure limits max_locked_memory
+  lineinfile:
+    dest=/etc/security/limits.conf
+    regexp='^{{ elastic_user }}     -    memlock   {{ elastic_max_locked_memory }}'
+    insertafter=EOF
+    line='{{ elastic_user }}     -    memlock   {{ elastic_max_locked_memory }}'
+  when: elastic_max_locked_memory is defined
+  notify: Restart Elasticsearch
+
+##- name: Configure su pam_limits.so
+##  lineinfile:
+##    dest=/etc/pam.d/su
+##    regexp='^session    required   pam_limits.so'
+##    insertafter=EOF
+##    line='session    required   pam_limits.so'
+##  notify: Restart Elasticsearch
+##
+##- name: Configure common-session pam_limits.so
+##  lineinfile:
+##    dest=/etc/pam.d/common-session
+##    regexp='^session    required   pam_limits.so'
+##    insertafter=EOF
+##    line='session    required   pam_limits.so'
+##  notify: Restart Elasticsearch
+##
+##- name: Configure common-session-noninteractive pam_limits.so
+##  lineinfile:
+##    dest=/etc/pam.d/common-session-noninteractive
+##    regexp='^session    required   pam_limits.so'
+##    insertafter=EOF
+##    line='session    required   pam_limits.so'
+##  notify: Restart Elasticsearch
+##
+##- name: Configure sudo pam_limits.so
+##  lineinfile:
+##    dest=/etc/pam.d/sudo
+##    regexp='^session    required   pam_limits.so'
+##    insertafter=EOF
+##    line='session    required   pam_limits.so'
+##  notify: Restart Elasticsearch
+##
+##- name: Configure initd java opts in /etc/init.d/elasticsearch
+##  lineinfile:
+##    dest=/etc/init.d/elasticsearch
+##    regexp='^(DAEMON_OPTS=".*-Des.max-open-files=true")$'
+##    insertafter='^(DAEMON_OPTS=".*CONF_DIR")$'
+##    line='DAEMON_OPTS="$DAEMON_OPTS -Des.max-open-files=true"'
+##  notify: Restart Elasticsearch
+#
+##- name: Configuring Elasticsearch elasticsearch.yml Node
+##  template:
+##    src=elasticsearch.yml.j2
+##    dest={{ elastic_conf_dir }}/elasticsearch.yml
+##    owner={{ elastic_user }}
+##    group={{ elastic_group }}
+##    mode=0644
+##  when: elastic_conf_dir is defined
+##  notify: Restart Elasticsearch
+#
+##- name : Configure /etc/default/elasticsearch
+##  template:
+##    src=elasticsearch.default.j2
+##    dest=/etc/default/elasticsearch
+##    owner={{ elasticsearch_user }}
+##    group={{ elasticsearch_group }}
+##    mode=0644
+##  notify: Restart Elasticsearch
+#
+#
+
+
+#- name: Add Elasticsearch Key
+#  apt_key: url='http://packages.elastic.co/GPG-KEY-elasticsearch' state=present
+##
+#- name: Check whether elasticsearch version already installed
+#  shell: if [ -e /usr/share/elasticsearch/lib/elasticsearch-{{ elastic_version }}.jar ]; then echo yes; else echo no; fi;
+#  register: version_exists
+#  always_run: True
+##
+#- name: Remove previous version if applicable
+#  apt: pkg=elasticsearch state=absent
+#  when: version_exists.stdout == 'no' and (elastic_install_or_update is defined)
+##
+#- name: Add Elasticsearch Repository if needed
+#  apt_repository: repo='deb http://packages.elasticsearch.org/elasticsearch/{{ elastic_version }}/debian stable main' state=present
+##
+## Update Package Lists
+#- name: update package lists
+#  apt: update_cache=yes
+##
+#- name: Install Elasticsearch
+#  apt: name=elasticsearch state=present
+#  when: (elastic_install_or_update is defined)
+#
+- name: Configuring Elasticsearch elasticsearch.yml Node
+  template:
+    src=elasticsearch.yml.j2
+    dest={{ elastic_conf_dir }}/elasticsearch.yml
+    owner={{ elastic_user }}
+    group={{ elastic_group }}
+    mode=0644
+  when: elastic_conf_dir is defined
+  notify: Restart Elasticsearch
+
+#- name: Configure Elasticsearch
+#  template: src=elasticsearch.yml.j2 dest=/etc/elasticsearch/elasticsearch.yml
+#  notify:
+#   - Restart Elasticsearch
+
+# Install Marvel Plugin
+- include: kopf.yml
+  when: install_kopf
+
+- include: elastichq.yml
+  when: install_hq
+
+# Run sudo update-rc.d elasticsearch defaults 95 10
+- name: Enable Elasticsearch to start on VM boot
+  service: name=elasticsearch enabled=yes
+  notify:
+   - Start Elasticsearch
+
+##- name: Check If Index Exists
+##  uri: url='http://localhost:9200/{{ index_name }}'
+##       method=HEAD
+##       status_code=200,404
+##  register: index_status
+#
+## - name: Create SFH Index
+##   uri: url='http://localhost:9200/{{ index_name }}'
+##        method=PUT
+##        status_code=200
+##   when: index_status.status == 404
+#
+##- name: Create SFH Index with Mapping
+##  uri: url='http://localhost:9200/{{ index_name }}'
+##       method=POST
+##       status_code=200
+##       body='{{ lookup('file','content_mapping.json') }}'
+##       HEADER_Content-Type="application/json"
+##  when: index_status.status == 404

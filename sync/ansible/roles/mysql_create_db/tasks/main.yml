@@ -1,0 +1,6 @@
+---
+# Create database
+- name: Create database
+  mysql_db: login_user=root login_password={{ mysql_password }} name={{ mysql_db_name }}
+
+

@@ -1,0 +1,4 @@
+---
+# Restart MySQL
+- name: restart mysql
+  service: name=mysql state=restarted

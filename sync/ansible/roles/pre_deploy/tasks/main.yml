@@ -1,0 +1,7 @@
+---
+- name: Create gitrepo directory
+  file: path={{ repo_directory }} state=directory recurse=yes
+
+- name: Initialize git repo
+  command: git init --bare chdir={{ repo_directory }}
+

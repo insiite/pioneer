@@ -1,0 +1,11 @@
+---
+- name: Git push project to /var/repo/site.git
+  hosts: local
+  become: yes
+
+
+  vars:
+        local_project_directory: /home/vagrant/sync/projects/bluemonkey
+
+  roles:
+      - git_push

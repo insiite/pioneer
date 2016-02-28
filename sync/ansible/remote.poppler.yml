@@ -1,0 +1,8 @@
+---
+- name: Install Popper
+  hosts: remote
+  become: yes
+
+  roles:
+      - poppler
+

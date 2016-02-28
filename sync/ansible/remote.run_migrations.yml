@@ -1,0 +1,10 @@
+---
+- name: Add new vhost
+  hosts: remote
+  become: yes
+
+  vars:
+    project_folder: "/var/www/alpha"
+
+  roles:
+      - run_migrations

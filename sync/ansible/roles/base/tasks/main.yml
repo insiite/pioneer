@@ -1,0 +1,255 @@
+---
+# Update Package List
+- name: update package lists
+  apt: update_cache=yes cache_valid_time={{ cache_valid_time}}
+  when: update_cache
+
+# Upgrade Package List
+- name: upgrade installed packages
+  apt: upgrade=dist
+  when: upgrade_packages
+
+# Install software-properties-common  -- this is needed to manage the PPAs
+- name: install software-properties-common
+  apt: name=software-properties-common state=present
+
+# Install python-pycurl interface -- this is so that we can use apt_repository
+- name: install python-pycurl interface
+  apt: name=python-pycurl
+
+# Add the PPA repositories
+- name: add package repositories
+  apt_repository: repo={{ item }}
+  with_items:
+    - "ppa:nginx/stable"
+    - "ppa:rwky/redis"
+    - "ppa:chris-lea/node.js"
+    - "ppa:ondrej/php-7.0"
+    - "ppa:ondrej/mysql-5.7"
+
+# Update Package Lists
+- name: update package lists
+  apt: update_cache=yes
+
+# Install Some Basic Packages
+- name: install some basic packages
+  apt: name={{ item }} state=present
+  with_items:
+    - "build-essential"
+    - "curl"
+    - "dos2unix"
+    - "gcc"
+    - "git"
+    - "libmcrypt4"
+    - "libpcre3-dev"
+    - "make"
+    - "python2.7-dev"
+    - "python-pip"
+    - "re2c"
+    - "supervisor"
+    - "unattended-upgrades"
+    - "whois"
+    - "vim"
+    - "libnotify-bin"
+    - "htop"
+    - "apache2-utils"
+    - "python-passlib"
+
+# Ensure that PIP is upgraded
+- name: Make sure pip upgraded
+  command: easy_install -U pip
+
+# Install A Few Helpful Python Packages
+- name: install a few helpful python packages
+  pip: name={{ item }} state=present
+  with_items:
+    - "httpie"
+    - "fabric"
+    - "python-simple-hipchat"
+
+# Set My Timezone -- this symlinks the info of the src=local machine to the dest=host server
+- name: set my timezone
+  file: src=/usr/share/zoneinfo/{{ timezone }} dest=/etc/localtime state=link force=yes
+
+# Install PHP Stuff
+- name: install php stuff
+  apt: name={{ item }} state=present
+  with_items:
+   - "php7.0-cli"
+   - "php7.0"
+   - "php7.0-cgi"
+   - "php7.0-fpm"
+   - "php7.0-common"
+   - "php7.0-dev"
+   - "php7.0-curl"
+   - "php-pear"
+   - "php-pgsql"
+   - "php7.0-sqlite3"
+   - "php-apcu"
+   - "php7.0-json"
+   - "php7.0-gd"
+   - "php-gmp"
+   - "php-imap"
+   - "php7.0-mysql"
+   - "php7.0-mcrypt"
+   - "php-xdebug"
+   - "php-memcached"
+   - "php-redis"
+   - "php7.0-readline"
+
+# Make MCrypt Available
+- name: make mcrypt available
+  file: src=/etc/php/7.0/mods-available/mcrypt.ini dest=/etc/php/7.0/cli/conf.d/20-mcrypt.ini state=link force=yes
+
+# Install Mailparse PECL Extension
+- name: install mailparse pecl extension
+  command: pecl install mailparse
+  register: pecl_result
+  changed_when: "'already installed' not in pecl_result.stdout"
+  failed_when: "pecl_result.stderr or ('ERROR' in pecl_result.stdout)"
+
+# Create Mailparse.ini
+- name: create mailparse.ini
+  copy: content="extensions=mailparse.so" dest=/etc/php/7.0/mods-available/mailparse.ini
+
+# Make Mailparse available
+- name: make mailparse available
+  file: src=/etc/php/7.0/mods-available/mailparse.ini dest=/etc/php/7.0/cli/conf.d/20-mailparse.ini state=link force=yes
+
+# Install Composer
+- name: install composer
+  shell: curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer creates=/usr/local/bin/composer
+
+# Add Composer Global Bin To Path -- I changed this from /home/vagrant/.profile and /home/vagrant/.composer/vendor/bin
+- name: add composer global bin to path
+  lineinfile: dest=/etc/.profile line=PATH="/etc/.composer/vendor/bin:$PATH" create=yes
+
+# Install Laravel Envoy -- I changed this from /home/vagrant/.composer/vendor/bin/evnoy
+- name: install laravel envoy
+  command: /usr/local/bin/composer global require "laravel/envoy=~1.0" creates=/etc/.composer/vendor/bin/envoy
+  #sudo_user: vagrant
+
+
+# Set Some PHP CLI Settings
+- name: set some php cli settings
+  lineinfile: dest=/etc/php/7.0/cli/php.ini regexp='{{ item.regex }}' line='{{ item.line }}'
+  with_items:
+    - {regex: "error_reporting = .*", line: "error_reporting = E_ALL"}
+    - {regex: "display_errors = .*", line: "display_errors = On"}
+    - {regex: "memory_limit = .*", line: "memory_limit = 512M"}
+    - {regex: "date.timezone =.*", line: "date.timezone = {{ timezone }}"}
+
+
+# Install Nginx & PHP-FPM
+- name: install nginx and php-fpm
+  apt: name={{ item }} state=present
+  with_items:
+    - nginx
+    - php7.0-fpm
+
+# Ensure Nginx Is Running
+- name: ensure nginx is running
+  service: name=nginx state=started enabled=yes
+
+# Ensure PHP5-fpm is running
+- name: ensure php7.0-fpm is running
+  service: name=php7.0-fpm state=started enabled=yes
+
+- file: dest={{ item }} state=absent
+  with_items:
+   - "/etc/nginx/sites-enabled/default"
+   - "/etc/nginx/sites-available/default"
+  notify:
+   - restart nginx
+
+
+# Make MailParse Available
+- name: make mailparse available
+  file: src=/etc/php/7.0/mods-available/mailparse.ini dest=/etc/php/7.0/fpm/conf.d/20-mailparse.ini state=link force=yes
+
+# Set Some PHP-FPM Settings
+- name: set some php fpm settings
+  lineinfile: dest=/etc/php/7.0/fpm/php.ini regexp="{{ item.regex }}" line="{{ item.line }}"
+  with_items:
+    - {regex: "error_reporting = .*", line: "error_reporting = E_ALL"}
+    - {regex: "display_errors = .*", line: "display_errors = On"}
+    - {regex: "cgi.fix_pathinfo=.*", line: "cgi.fix_pathinfo=0"}
+    - {regex: "memory_limit = .*", line: "memory_limit = 512M"}
+    - {regex: "upload_max_filesize = .*", line: "upload_max_filesize = 100M"}
+    - {regex: "post_max_size = .*", line: "post_max_size = 100M"}
+    - {regex: "date.timezone =.*", line: "date.timezone = {{ timezone }}"}
+
+# Set Some Xdebug Options
+- name: set some xdebug options
+  copy: content="{{ item }}" dest=/etc/php/7.0/fpm/conf.d/20-xdebug.ini
+  with_items:
+    - xdebug.remote_enable = 1
+    - xdebug.remote_connect_back = 1
+    - xdebug.remote_port = 9000
+  notify:
+    - restart php7.0-fpm
+
+# Copy Fastcgi_params To Nginx Because They Broke It On The PPA
+- name: copy fastcgi_params
+  template: dest=/etc/nginx/fastcgi_params src=fastcgi_params
+
+# Set The Nginx User
+- name: set nginx user
+  lineinfile: dest=/etc/nginx/nginx.conf regexp="{{ item.regex }}" line="{{ item.line }}"
+  with_items:
+    - {regex: "user .*;", line: "user www-data;"}
+    - {regex: "server_names_hash_bucket_size.*", line: "server_names_hash_bucket_size 64;"}
+  notify:
+    - restart nginx
+
+# Set the PHP5-fpm User
+- name: set php7.0-fpm user
+  lineinfile: dest=/etc/php/7.0/fpm/pool.d/www.conf regexp="{{ item.regex }}" line="{{ item.line }}"
+  with_items:
+    - {regex: "^user = .*", line: "user = www-data"}
+    - {regex: "^group = .*", line: "group = www-data"}
+    - {regex: "listen.owner.*", line: "listen.owner = www-data"}
+    - {regex: "listen.group.*", line: "listen.group = www-data"}
+    - {regex: "listen.mode.*", line: "listen.mode = 0666"}
+    - {regex: "^listen =.*", line: "listen = 127.0.0.1:9000"}
+  notify:
+    - restart php7.0-fpm
+
+# Add vagrant 'www-data' user To 'www-data' group
+- name: add www-data user to www-data group
+  user: name=www-data groups=www-data append=yes
+
+
+# Install Node
+- name: install nodejs
+  apt: name=nodejs state=present
+
+# Install Some NodeJS Packages
+- name: install some nodejs packages
+  npm: name={{ item }} state=present global=yes
+  with_items:
+    - grunt-cli
+    - gulp
+    - bower
+
+# Install SQLite
+- name: install sqlite
+  apt: name={{ item }} state=present
+  with_items:
+    - sqlite3
+    - libsqlite3-dev
+
+
+# Install A Few Other Things
+- name: install a few other things
+  apt: name={{ item }} state=present
+  with_items:
+    - redis-server
+    - memcached
+    - beanstalkd
+
+# Configure Beanstalkd
+- lineinfile: dest=/etc/default/beanstalkd regexp="START=yes" line="START=yes"
+
+- name: ensure beanstalkd is running
+  service: name=beanstalkd state=started enabled=yes

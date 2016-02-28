@@ -1,0 +1,12 @@
+---
+- name: Add new vhost
+  hosts: remote
+  become: yes
+
+  vars:
+        root_folder: "/var/www/alpha/public"
+        server_name: "178.65.42.75
+        auth_satisfy: "all"
+
+  roles:
+      - nginx_vhost

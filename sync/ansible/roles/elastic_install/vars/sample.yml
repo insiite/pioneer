@@ -1,0 +1,62 @@
+---
+# Basic settings (MUST-HAVE)
+elastic_cluster_name: elastic-cluster
+elastic_node_name: elastic-node-00
+
+
+# Common settings (NOT-REQUIRED)
+elastic_index_number_of_shards: 5
+elastic_index_number_of_replicas: 1
+elastic_plugin_marvel_version: latest
+
+# Cluster settings (ONLY FOR CLUSTERS)
+node.master: "true"
+elastic_node_data: "true"
+elastic_node_max_local_storage_nodes: 1
+elastic_node_local: "true"
+
+elastic_index_mapper_dynamic: "true"
+elastic_misc_query_bool_max_clause_count: 4096
+elastic_conf_dir: /etc/elasticsearch
+elastic_data_dir: /var/lib/elasticsearch
+elastic_work_dir: /tmp/elasticsearch
+elastic_log_dir: /var/log/elasticsearch
+elastic_plugin_dir: /usr/share/elasticsearch/plugins
+elastic_memory_bootstrap_mlockall: "true"
+elastic_network_bind_host: 192.168.0.1
+elastic_network_publish_host: 192.168.0.1
+elastic_network_host: 192.168.22.16
+elastic_network_transport_tcp_port: 9300
+elastic_network_transport_tcp_compress: "true"
+elastic_network_http_port: 9200
+elastic_network_http_max_content_length: 100mb
+elastic_network_http_enabled: "true"
+elastic_gateway_type: local
+elastic_gateway_recover_after_nodes: 1
+elastic_gateway_recover_after_time: 2m
+elastic_gateway_expected_nodes: 1
+elastic_recovery_node_initial_primaries_recoveries: 2
+elastic_discovery_zen_minimum_master_nodes: 1
+elastic_discovery_zen_ping_timeout: 30s
+elastic_discovery_zen_ping_multicast_enabled: "false"
+elastic_discovery_zen_ping_unicast_hosts: ["192.168.22.15:9300"]
+elastic_misc_disable_delete_all_indices: "true"
+
+
+# NOTES:
+
+# We are able to bind to ELASTIC-02 by using the following settings
+---
+elastic_cluster_name: insiitesearch
+elastic_node_name: elastic-node-00 ## This is set to a different name for ELASTIC-02
+elastic_index_number_of_shards: 5
+elastic_index_number_of_replicas: 1
+elastic_memory_bootstrap_mlockall: "true"
+elastic_network_host: 192.168.22.17 ## This is set to 192.168.22.15 for ELASTIC-02
+elastic_network_transport_tcp_port: 9302 ## This is set to 9300 for ELASTIC-02
+elastic_discovery_zen_ping_multicast_enabled: "false"
+elastic_discovery_zen_ping_unicast_hosts: ["192.168.22.15:9300"] ## these same settings are applied to ELASTIC-02
+
+
+
+

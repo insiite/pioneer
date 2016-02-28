@@ -1,0 +1,15 @@
+---
+- name: Create database
+  hosts: local
+  become: yes
+
+  vars:
+     # mysql_db_name defaults to "homestead", comment out for default
+     # mysql_db_name: mydatabase
+
+     # mysql_password defaults to "secret", comment out for default
+     # mysql_password: password
+
+  roles:
+      - mysql_create_db
+

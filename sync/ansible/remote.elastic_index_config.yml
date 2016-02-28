@@ -1,0 +1,7 @@
+---
+- name: PUT elastic mapping
+  hosts: remote
+  become: yes
+
+  roles:
+   - elastic_index_config

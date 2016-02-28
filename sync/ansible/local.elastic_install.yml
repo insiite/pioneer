@@ -1,0 +1,16 @@
+---
+- name: Install Elasticsearch
+  hosts: localhost
+  become: yes
+  
+  vars:
+      #ONLY INCLUDE WHEN NEEDED
+      #elastic_plugin_marvel_install: true
+      elastic_install_or_update: true
+      install_java: true
+      install_kopf: true
+      install_hq: false
+
+  roles:
+      - elastic_install
+

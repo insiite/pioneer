@@ -1,0 +1,34 @@
+---
+# Set the root user password (will fail if not run on new install)
+- name: Set the root user password (will fail if not run on new install - root password has already been reset)
+  mysql_user: user="root" host="localhost" password={{ mysql_password }} priv=*.*:ALL,GRANT
+#  mysql_user: user="root" host="localhost" password="secret" priv=*.*:ALL,GRANT
+  ignore_errors: yes
+
+# Set root user password for all hosts
+- name: set root user password for all hosts
+  mysql_user: login_user="root" login_password={{ mysql_password }} user="root" host={{ item }} password={{ mysql_password }} priv=*.*:ALL,GRANT
+  with_items:
+    - ubuntu
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+# Create admin user with all privilages
+- name: Create admin user with all privilages
+  mysql_user: login_user=root login_password={{ mysql_password }} user={{ mysql_admin }} host={{ item }} password={{ mysql_password }} priv=*.*:ALL,GRANT state=present
+  with_items:
+    - ubuntu
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+
+# Remove anonymous user for all hosts
+- name: Remove anonymous user for all hosts
+  mysql_user: login_user=root login_password={{ mysql_password }} name="" host={{ item }} state=absent
+  with_items:
+    - ubuntu
+    - localhost
+
+

@@ -1,0 +1,10 @@
+---
+elastic_cluster_name: insiite-elastic-c1
+elastic_node_name: insiite-elastic-c1n0
+elastic_index_number_of_shards: 5
+elastic_index_number_of_replicas: 0
+#elastic_plugin_marvel_version: latest
+java_ppa: ppa:openjdk-r/ppa
+java_package: openjdk-8-jdk
+elastic_version: 2.1.1
+elastic_root_uri: /_elastic

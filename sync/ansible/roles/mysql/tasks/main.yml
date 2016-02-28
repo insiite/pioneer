@@ -1,0 +1,16 @@
+---
+# MySQL
+- name: Install MySQL
+  apt: pkg={{ item }} update_cache=yes cache_valid_time=3600 state=present
+  with_items:
+    - mysql-server
+    - mysql-client
+    - python-mysqldb
+
+
+# Restart MySQL
+- name: Restart MySQL is running
+  service: name=mysql state=restarted
+
+
+

@@ -1,0 +1,15 @@
+---
+- name: Configure alpha
+  hosts: remote
+  become: yes
+
+  vars:
+    repo_directory: "/var/git_repo/site.git"
+    alpha_directory: /var/www/alpha
+    phantom_runner_source: /var/www/alpha/app/Modules/Phantom/
+    phantom_runner_temp: /var/www/alpha/storage/phantom_runner/
+    phantom_runner_path: /var/www/alpha/app/Modules/Phantom/phantom_runner.js
+    config_path: /var/www/alpha/public/desktop/modules/Base/config.js
+
+  roles:
+      - config_alpha

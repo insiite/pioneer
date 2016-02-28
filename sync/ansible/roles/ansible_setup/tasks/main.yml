@@ -1,0 +1,4 @@
+---
+- name: Configure hosts
+  template: src=hosts.j2 dest=/etc/ansible/hosts
+
